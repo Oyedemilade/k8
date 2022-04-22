@@ -52,9 +52,9 @@ kind: ConfigMap
 metadata:
   name: phppgconfig
 data:
-  DATABASE_ENABLE_EXTRA_LOGIN_SECURITY: yes
-  DATABASE_HOST: pgsql-svc.playground
-  DATABASE_PORT_NUMBER: 5432
+  DATABASE_ENABLE_EXTRA_LOGIN_SECURITY: "yes"
+  DATABASE_HOST: "pgsql-svc.playground"
+  DATABASE_PORT_NUMBER: "5432"
 ---
 apiVersion: apps/v1
 kind: Deployment
