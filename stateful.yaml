@@ -25,10 +25,10 @@ spec:
           envFrom: 
           - secretRef:
               name: pgdb-secret      
-          volumes:
-          - name: pgdata
-            hostPath:
-              path: /home/pgdata
+        volumes:
+        - name: pgdata
+          hostPath:
+            path: /home/pgdata
               
 
 
