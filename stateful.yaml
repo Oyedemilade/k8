@@ -1,0 +1,96 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: playpgdb
+spec:
+  serviceName: postgresql-db-service
+  selector:
+    matchLabels:
+      app: playpgdb
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: playpgdb
+    spec:
+      containers:
+        - name: playpgdb
+          image: postgres:12-alpine
+          volumeMounts:
+            - name: pgdata
+              mountPath: /var/lib/postgresql/data
+          env:
+            - name: PGDATA
+              value: /var/lib/postgresql/data/pgdata
+          envFrom: 
+          - secretRef:
+              name: pgdb-secret      
+          volumes:
+          - name: pgdata
+            hostPath:
+              path: /home/pgdata
+              
+
+
+    
+
+---
+#secret
+
+apiVersion: v1
+kind: Secret
+metadata:
+  name: pgdb-secret
+stringData:
+  POSTGRES_USER: postgres
+  POSTGRES_PASS: reallysecret
+
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: phppgconfig
+data:
+  DATABASE_ENABLE_EXTRA_LOGIN_SECURITY: yes
+  DATABASE_HOST: pgsql-svc.playground
+  DATABASE_PORT_NUMBER: 5432
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pgdb-frontend
+spec:
+  selector:
+    matchLabels:
+      app: pgdb-frontend
+  template:
+    metadata:
+      labels:
+        app: pgdb-frontend
+    spec:
+      containers:
+      - name: pgdb-frontend
+        image: bitnami/phppgadmin:latest
+        resources:
+          limits:
+            memory: "128Mi"
+            cpu: "500m"
+        ports:
+        - containerPort: 8080
+
+
+
+---
+# PostgreSQL StatefulSet Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: pgdb-frontend-svc
+spec:
+  type: NodePort
+  selector:
+    app: pgdb-frontend
+  ports:
+    - port: 8080
+      targetPort: 31080
